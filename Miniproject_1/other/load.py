@@ -3,8 +3,18 @@ from torch.utils.data import (DataLoader,)  # Gives easier dataset managment and
 import torchvision.transforms as transforms  # Transformations we can perform on our dataset
 import matplotlib.pyplot as plt
 
+from torch import nn
+from torch import optim
+
+from model import Model
+
+
 noisy_imgs_train_1, noisy_imgs_train_2 = torch.load('../../miniproject_dataset/train_data.pkl')
 noisy_imgs_valid, clean_imgs_valid = torch.load('../../miniproject_dataset/val_data.pkl')
+
+noisy_imgs_train_1 = noisy_imgs_train_1.float()/255
+noisy_imgs_train_2 = noisy_imgs_train_2.float()/255
+
 
 print('noisy_imgs_train_1', noisy_imgs_train_1.size(), 'noisy_imgs_train_2', noisy_imgs_train_2.size())
 print('noisy_imgs_valid', noisy_imgs_valid.size(), 'clean_imgs_valid', clean_imgs_valid.size())
@@ -21,8 +31,8 @@ def plot_pair_of_images(img1, img2):
         axes[1].imshow(img2[i, :, :, :].permute((1, 2, 0)), interpolation='spline16')
         plt.show()
 
-plot_pair_of_images(noisy_imgs_train_1[0:4, :, :, :], noisy_imgs_train_2[0:4, :, :, :])
-plot_pair_of_images(noisy_imgs_valid[0:4, :, :, :], clean_imgs_valid[0:4, :, :, :])
+# plot_pair_of_images(noisy_imgs_train_1[0:4, :, :, :], noisy_imgs_train_2[0:4, :, :, :])
+# plot_pair_of_images(noisy_imgs_valid[0:4, :, :, :], clean_imgs_valid[0:4, :, :, :])
 
 
 # transform data
@@ -43,4 +53,14 @@ my_transforms = transforms.Compose(
 
 transformed_imgs = my_transforms(noisy_imgs_train_1[0:4, :, :, :])
 # plot_images(transformed_imgs)
+
+
+
+################################################################################
+
+# train
+model = Model()
+model.train(noisy_imgs_train_1, noisy_imgs_train_2)
+
+# loss = 0.5 * (output - input).pow(2).sum() / input.size(0)
 
