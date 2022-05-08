@@ -1,0 +1,7 @@
+# run test.py:
+
+# without blank spaces in the path:
+python test.py -d C:\Users\Luca\Desktop\Proj_XXXXXX_XXXXXX_XXXXXX\miniproject_dataset -p C:\Users\Luca\Desktop\Proj_XXXXXX_XXXXXX_XXXXXX
+
+# with blank spaces in the path:
+python test.py -d "G:\Mon Drive\Micro MA4\Deep Learning\practical\mini_projects\Deep_Learning\miniproject_dataset" -p "G:\Mon Drive\Micro MA4\Deep Learning\practical\mini_projects\Deep_Learning"
