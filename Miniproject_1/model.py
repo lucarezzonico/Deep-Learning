@@ -1,14 +1,14 @@
 import torch
 import torch.nn as nn
 from torch import optim
-from other.net import Net
+from other.net import *
 # model.py will be imported by the testing pipeline
 
 class Model():
     def __init__(self, nb_input=3, nb_output=3) -> None:
         ## instantiate model + optimizer + loss function + any other stuff you need
 
-        self.model = Net()
+        self.model = Net2()
 
     def save_model(self) -> None:
         ## This saves the parameters of the model into bestmodel.pth
@@ -38,6 +38,7 @@ class Model():
 
         for e in range(nb_epochs):
             for b in range(0, train_input.size(dim=0), mini_batch_size):
+                print('batch {:d}'.format(b))
                 self.optimizer.zero_grad()
                 output = self.model(train_input.narrow(dim=0, start=b, length=mini_batch_size)) # takes time
                 loss = self.criterion(output, train_target.narrow(dim=0, start=b, length=mini_batch_size))
