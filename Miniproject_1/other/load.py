@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from torch import nn
 from torch import optim
 
-from model import Model
+from Miniproject_1.model import Model
 
 
 noisy_imgs_train_1, noisy_imgs_train_2 = torch.load('../../miniproject_dataset/train_data.pkl')
@@ -14,6 +14,8 @@ noisy_imgs_valid, clean_imgs_valid = torch.load('../../miniproject_dataset/val_d
 
 noisy_imgs_train_1 = noisy_imgs_train_1.float()/255
 noisy_imgs_train_2 = noisy_imgs_train_2.float()/255
+noisy_imgs_valid = noisy_imgs_valid.float()/255
+clean_imgs_valid = clean_imgs_valid.float()/255
 
 
 print('noisy_imgs_train_1', noisy_imgs_train_1.size(), 'noisy_imgs_train_2', noisy_imgs_train_2.size())

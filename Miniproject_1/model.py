@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 from torch import optim
-from other.net import *
+from Miniproject_1.other.net import Net
 # model.py will be imported by the testing pipeline
 
 class Model():
