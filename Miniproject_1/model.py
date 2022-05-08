@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 from torch import optim
-from Miniproject_1.other.net import Net
+from Miniproject_1.other.net import *
 # model.py will be imported by the testing pipeline
 
 class Model():
@@ -12,13 +12,15 @@ class Model():
 
     def save_model(self) -> None:
         ## This saves the parameters of the model into bestmodel.pth
-        torch.save(self.model.state_dict(), 'bestmodel.pth')
+        print('model saved to bestmodel.pth')
+        torch.save(self.model.state_dict(), '../bestmodel.pth')
         pass
 
     def load_pretrained_model(self) -> None:
         ## This loads the parameters saved in bestmodel.pth into the model
-        m_state_dict = torch.load('bestmodel.pth')
+        m_state_dict = torch.load('../bestmodel.pth')
         self.model.load_state_dict(m_state_dict)
+        print('model loaded')
         pass
 
     def train(self, train_input, train_target) -> None:
@@ -28,6 +30,10 @@ class Model():
         learning_rate = 1e-1
         nb_epochs = 250
         mini_batch_size = 1000
+
+        nb_epochs = 3
+        mini_batch_size = 200
+
         # self.criterion = nn.CrossEntropyLoss()
         self.criterion = nn.MSELoss()
         self.optimizer = optim.SGD(self.model.parameters(), lr=learning_rate)
