@@ -122,3 +122,34 @@ class Net2(nn.Module):
 
     def forward(self, input):
         return self.model(input)
+
+class Net3(nn.Module):
+    def __init__(self, nb_input=3, nb_output=3):
+        # initialize deep-learning network
+        super(Net3, self).__init__()
+
+        self.model = nn.Sequential(
+            # encoder
+            nn.Conv2d(3, 32, kernel_size=5, stride=1, padding=2),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(32, 32, kernel_size=5, stride=1, padding=2),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(32, 32, kernel_size=4, stride=2, padding=0),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(32, 32, kernel_size=3, stride=2, padding=0),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(32, 8, kernel_size=4, stride=1, padding=0),
+            # decoder
+            nn.ConvTranspose2d(8, 32, kernel_size=4, stride=1, padding=0),
+            nn.ReLU(inplace=True),
+            nn.ConvTranspose2d(32, 32, kernel_size=3, stride=2, padding=0),
+            nn.ReLU(inplace=True),
+            nn.ConvTranspose2d(32, 32, kernel_size=4, stride=2, padding=0),
+            nn.ReLU(inplace=True),
+            nn.ConvTranspose2d(32, 32, kernel_size=5, stride=1, padding=0),
+            nn.ReLU(inplace=True),
+            nn.ConvTranspose2d(32, 3, kernel_size=5, stride=1, padding=0)
+        )
+
+    def forward(self, input):
+        return self.model(input)
