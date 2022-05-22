@@ -100,23 +100,23 @@ class Net2(nn.Module):
         self.model = nn.Sequential(
             # encoder
             nn.Conv2d(3, 32, kernel_size=5, stride=1, padding=0),
-            nn.ReLU(inplace=True),
+            nn.ReLU(),
             nn.Conv2d(32, 32, kernel_size=5, stride=1, padding=0),
-            nn.ReLU(inplace=True),
+            nn.ReLU(),
             nn.Conv2d(32, 32, kernel_size=4, stride=2, padding=0),
-            nn.ReLU(inplace=True),
+            nn.ReLU(),
             nn.Conv2d(32, 32, kernel_size=3, stride=2, padding=0),
-            nn.ReLU(inplace=True),
+            nn.ReLU(),
             nn.Conv2d(32, 8, kernel_size=4, stride=1, padding=0),
             # decoder
             nn.ConvTranspose2d(8, 32, kernel_size=4, stride=1, padding=0),
-            nn.ReLU(inplace=True),
+            nn.ReLU(),
             nn.ConvTranspose2d(32, 32, kernel_size=3, stride=2, padding=0),
-            nn.ReLU(inplace=True),
+            nn.ReLU(),
             nn.ConvTranspose2d(32, 32, kernel_size=4, stride=2, padding=0),
-            nn.ReLU(inplace=True),
+            nn.ReLU(),
             nn.ConvTranspose2d(32, 32, kernel_size=5, stride=1, padding=0),
-            nn.ReLU(inplace=True),
+            nn.ReLU(),
             nn.ConvTranspose2d(32, 3, kernel_size=5, stride=1, padding=0)
         )
 
@@ -130,25 +130,25 @@ class Net3(nn.Module):
 
         self.model = nn.Sequential(
             # encoder
-            nn.Conv2d(3, 32, kernel_size=5, stride=1, padding=2),
+            nn.Conv2d(3, 32, kernel_size=5, stride=1, padding=2, dilation=1),
             nn.ReLU(inplace=True),
-            nn.Conv2d(32, 32, kernel_size=5, stride=1, padding=2),
+            nn.Conv2d(32, 32, kernel_size=5, stride=1, padding=2, dilation=1),
             nn.ReLU(inplace=True),
-            nn.Conv2d(32, 32, kernel_size=4, stride=2, padding=0),
+            nn.Conv2d(32, 32, kernel_size=4, stride=2, padding=0, dilation=1),
             nn.ReLU(inplace=True),
-            nn.Conv2d(32, 32, kernel_size=3, stride=2, padding=0),
+            nn.Conv2d(32, 32, kernel_size=3, stride=2, padding=0, dilation=1),
             nn.ReLU(inplace=True),
-            nn.Conv2d(32, 8, kernel_size=4, stride=1, padding=0),
+            nn.Conv2d(32, 8, kernel_size=4, stride=1, padding=0, dilation=1),
             # decoder
-            nn.ConvTranspose2d(8, 32, kernel_size=4, stride=1, padding=0),
+            nn.ConvTranspose2d(8, 32, kernel_size=4, stride=1, padding=0, dilation=1),
             nn.ReLU(inplace=True),
-            nn.ConvTranspose2d(32, 32, kernel_size=3, stride=2, padding=0),
+            nn.ConvTranspose2d(32, 32, kernel_size=3, stride=2, padding=0, dilation=1),
             nn.ReLU(inplace=True),
-            nn.ConvTranspose2d(32, 32, kernel_size=4, stride=2, padding=0),
+            nn.ConvTranspose2d(32, 32, kernel_size=4, stride=2, padding=0, dilation=1),
             nn.ReLU(inplace=True),
-            nn.ConvTranspose2d(32, 32, kernel_size=5, stride=1, padding=0),
+            nn.ConvTranspose2d(32, 32, kernel_size=5, stride=1, padding=0, dilation=1),
             nn.ReLU(inplace=True),
-            nn.ConvTranspose2d(32, 3, kernel_size=5, stride=1, padding=0)
+            nn.ConvTranspose2d(32, 3, kernel_size=5, stride=1, padding=0, dilation=1)
         )
 
     def forward(self, input):
