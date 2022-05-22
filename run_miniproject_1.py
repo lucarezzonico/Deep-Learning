@@ -21,10 +21,10 @@ def plot_images(*args, titles):
         if len(args) > 1: _, axes = plt.subplots(1, len(args))
         for img, idx in zip(args, range(len(args))): # number datasets to plot
             if len(args) > 1:
-                axes[idx].imshow(img[i,:,:,:].permute((1, 2, 0)), interpolation='spline16')
+                axes[idx].imshow(img[i,:,:,:].permute((1, 2, 0)))
                 axes[idx].set_title(titles[idx])
             else:
-                plt.imshow(img[i, :, :, :].permute((1, 2, 0)), interpolation='spline16')
+                plt.imshow(img[i, :, :, :].permute((1, 2, 0)))
                 plt.title(titles[idx])
         plt.show()
 
@@ -61,7 +61,7 @@ test_target = clean_imgs_valid[0:1000, :, :, :]
 model = Model()
 
 # train
-model.train(train_input, train_target, num_epochs=1)
+model.train(train_input, train_target, num_epochs=15)
 model.save_model()
 
 # load model
@@ -72,8 +72,10 @@ denoised_test_input = model.predict(test_input)
 denoised_test_input = denoised_test_input.detach()
 
 # PSNR
-psnr = float(compute_psnr(denoised_test_input, test_target))
+psnr = float(compute_psnr(denoised_test_input, test_target.type(torch.FloatTensor).div(255)))
 print('PSNR = {:.2f}'.format(psnr),'dB')
+
+denoised_test_input = denoised_test_input.mul(255).to(torch.uint8)
 
 # plot denoised image
 plot_images(test_input[0:4,:,:,:], denoised_test_input[0:4,:,:,:], test_target[0:4,:,:,:], titles=['test_input','denoised_test_input','test_target'])
