@@ -5,7 +5,7 @@ from Miniproject_1.other.net import *
 # model.py will be imported by the testing pipeline
 
 class Model():
-    def __init__(self, lr=1e-4, optimizer='SGD', criterion='MSE') -> None:
+    def __init__(self, lr=1e-4, optimizer='SGD', criterion='MSE', scheduler_gamma=0.8) -> None:
         ## instantiate model + optimizer + loss function + any other stuff you need
 
         self.model = Net()
@@ -30,6 +30,8 @@ class Model():
         if optimizer == 'Adadelta':
             self.optimizer = optim.Adadelta(self.model.parameters(), lr=self.learning_rate)
 
+        self.scheduler = optim.lr_scheduler.StepLR(self.optimizer, step_size=1, gamma=scheduler_gamma)
+
     def save_model(self) -> None:
         ## This saves the parameters of the model into bestmodel.pth
         torch.save(self.model.state_dict(), 'Miniproject_1/bestmodel.pth')
@@ -41,7 +43,7 @@ class Model():
         self.model.load_state_dict(m_state_dict)
         # print('model loaded')
 
-    def train(self, train_input, train_target, num_epochs=1, mini_batch_size = 20) -> None:
+    def train(self, train_input, train_target, num_epochs=1, mini_batch_size = 20, lambda_l2=0) -> None:
         #: train_input : tensor of size (N, C, H, W) containing a noisy version of the images.
         #: train_target : tensor of size (N, C, H, W) containing another noisy version of the same images, which only differs from the input by their noise.
 
@@ -55,10 +57,16 @@ class Model():
                 output = self.model(train_input.narrow(dim=0, start=b, length=mini_batch_size)) # takes time
                 loss = self.criterion(output, train_target.narrow(dim=0, start=b, length=mini_batch_size))
                 self.optimizer.zero_grad()
+
+                # L2 penalty term (to avoid overfitting the training data for an increasing number of epochs)
+                for p in self.model.parameters():
+                    loss += lambda_l2 * p.pow(2).sum()
+
                 loss.backward() # takes time
                 self.optimizer.step()
             print('epoch {:d}/{:d}'.format(e + 1, num_epochs), 'training loss = {:.2f}'.format(loss))
-        pass
+
+            self.scheduler.step() # decrease learning rate
 
     def predict(self, test_input) -> torch.Tensor:
         #: test_input : tensor of size (N1 , C, H, W) that has to be denoised by the trained or the loaded network.

@@ -66,10 +66,10 @@ test_target = clean_imgs_valid[0:train_data_upper_index, :, :, :]
 # model = Model(lr=1e-1, optimizer='SGD', criterion='MSE')
 # model = Model(lr=1e-3, optimizer='Adam', criterion='MSE')
 # model = Model(lr=1e-3, optimizer='Adagrad', criterion='MSE')
-model = Model(lr=5e-1, optimizer='Adadelta', criterion='MSE')
+model = Model(lr=5e-1, optimizer='Adadelta', criterion='MSE', scheduler_gamma=0.8)
 
 # train
-model.train(train_input, train_target, num_epochs=15, mini_batch_size = 20)
+model.train(train_input, train_target, num_epochs=2, mini_batch_size=20, lambda_l2=0)
 model.save_model()
 
 # load model
