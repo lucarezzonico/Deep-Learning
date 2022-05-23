@@ -5,7 +5,7 @@ from Miniproject_1.other.net import *
 # model.py will be imported by the testing pipeline
 
 class Model():
-    def __init__(self) -> None:
+    def __init__(self, lr=1e-4, optimizer='SGD', criterion='MSE') -> None:
         ## instantiate model + optimizer + loss function + any other stuff you need
 
         self.model = Net()
@@ -14,11 +14,21 @@ class Model():
         print(self.device)
         self.model.to(self.device)
 
-        self.learning_rate = 1e-4
+        self.learning_rate = lr
 
-        # self.criterion = nn.CrossEntropyLoss()
-        self.criterion = nn.MSELoss()
-        self.optimizer = optim.Adam(self.model.parameters(), lr=self.learning_rate)
+        if criterion == 'MSE':
+            self.criterion = nn.MSELoss()
+        if criterion == 'CrossEntropyLoss':
+            self.criterion = nn.CrossEntropyLoss()
+
+        if optimizer == 'SGD':
+            self.optimizer = optim.SGD(self.model.parameters(), lr=self.learning_rate)
+        if optimizer == 'Adam':
+            self.optimizer = optim.Adam(self.model.parameters(), lr=self.learning_rate)
+        if optimizer == 'Adagrad':
+            self.optimizer = optim.Adagrad(self.model.parameters(), lr=self.learning_rate)
+        if optimizer == 'Adadelta':
+            self.optimizer = optim.Adadelta(self.model.parameters(), lr=self.learning_rate)
 
     def save_model(self) -> None:
         ## This saves the parameters of the model into bestmodel.pth

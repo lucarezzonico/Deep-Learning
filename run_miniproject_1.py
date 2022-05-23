@@ -53,12 +53,13 @@ def plot_images(*args, titles):
 ################################################################################
 
 #subset of data
-train_input = noisy_imgs_train_1[0:1000, :, :, :]
-train_target = noisy_imgs_train_2[0:1000, :, :, :]
-test_input = noisy_imgs_valid[0:1000, :, :, :]
-test_target = clean_imgs_valid[0:1000, :, :, :]
+train_data_upper_index = 1000
+train_input = noisy_imgs_train_1[0:train_data_upper_index, :, :, :]
+train_target = noisy_imgs_train_2[0:train_data_upper_index, :, :, :]
+test_input = noisy_imgs_valid[0:train_data_upper_index, :, :, :]
+test_target = clean_imgs_valid[0:train_data_upper_index, :, :, :]
 
-model = Model()
+model = Model(lr=1e-4, optimizer='SGD', criterion='MSE')
 
 # train
 model.train(train_input, train_target, num_epochs=15, mini_batch_size = 20)
