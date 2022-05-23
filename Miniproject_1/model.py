@@ -8,7 +8,7 @@ class Model():
     def __init__(self) -> None:
         ## instantiate model + optimizer + loss function + any other stuff you need
 
-        self.model = Net2()
+        self.model = Net()
 
         self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
         print(self.device)
@@ -37,8 +37,8 @@ class Model():
 
         train_input, train_target = train_input.to(self.device), train_target.to(self.device)
 
-        train_input = train_input.type(torch.FloatTensor).div(255)
-        train_target = train_target.type(torch.FloatTensor).div(255)
+        train_input = train_input.float().div(255)
+        train_target = train_target.float().div(255)
 
         mini_batch_size = 20
 
@@ -63,7 +63,7 @@ class Model():
 
         test_input = test_input.to(self.device)
 
-        test_input = test_input.type(torch.FloatTensor).div(255)
+        test_input = test_input.float().div(255)
 
         predicted_output = self.model(test_input)
 

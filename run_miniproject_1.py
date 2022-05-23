@@ -72,7 +72,7 @@ denoised_test_input = model.predict(test_input)
 denoised_test_input = denoised_test_input.detach()
 
 # PSNR
-psnr = float(compute_psnr(denoised_test_input, test_target.type(torch.FloatTensor).div(255)))
+psnr = float(compute_psnr(denoised_test_input, test_target.float().div(255)))
 print('PSNR = {:.2f}'.format(psnr),'dB')
 
 denoised_test_input = denoised_test_input.mul(255).to(torch.uint8)
