@@ -61,7 +61,7 @@ test_target = clean_imgs_valid[0:1000, :, :, :]
 model = Model()
 
 # train
-model.train(train_input, train_target, num_epochs=15)
+model.train(train_input, train_target, num_epochs=15, mini_batch_size = 20)
 model.save_model()
 
 # load model

@@ -31,7 +31,7 @@ class Model():
         self.model.load_state_dict(m_state_dict)
         # print('model loaded')
 
-    def train(self, train_input, train_target, num_epochs=1) -> None:
+    def train(self, train_input, train_target, num_epochs=1, mini_batch_size = 20) -> None:
         #: train_input : tensor of size (N, C, H, W) containing a noisy version of the images.
         #: train_target : tensor of size (N, C, H, W) containing another noisy version of the same images, which only differs from the input by their noise.
 
@@ -39,8 +39,6 @@ class Model():
 
         train_input = train_input.float().div(255)
         train_target = train_target.float().div(255)
-
-        mini_batch_size = 20
 
         for e in range(num_epochs):
             for b in range(0, train_input.size(dim=0), mini_batch_size):
