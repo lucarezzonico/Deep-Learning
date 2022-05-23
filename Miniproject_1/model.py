@@ -11,6 +11,7 @@ class Model():
         self.model = Net()
 
         self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+        print(self.device)
         self.model.to(self.device)
 
         self.learning_rate = 1e-4
@@ -43,8 +44,6 @@ class Model():
 
         for e in range(num_epochs):
             for b in range(0, train_input.size(dim=0), mini_batch_size):
-                print('batch {:d}'.format(b))
-
                 output = self.model(train_input.narrow(dim=0, start=b, length=mini_batch_size)) # takes time
                 loss = self.criterion(output, train_target.narrow(dim=0, start=b, length=mini_batch_size))
                 self.optimizer.zero_grad()
