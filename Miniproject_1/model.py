@@ -10,6 +10,9 @@ class Model():
 
         self.model = Net2()
 
+        self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+        self.model.to(self.device)
+
         self.learning_rate = 1e-4
 
         # self.criterion = nn.CrossEntropyLoss()
@@ -31,20 +34,12 @@ class Model():
         #: train_input : tensor of size (N, C, H, W) containing a noisy version of the images.
         #: train_target : tensor of size (N, C, H, W) containing another noisy version of the same images, which only differs from the input by their noise.
 
+        train_input, train_target = train_input.to(self.device), train_target.to(self.device)
+
         train_input = train_input.type(torch.FloatTensor).div(255)
         train_target = train_target.type(torch.FloatTensor).div(255)
 
-        # num_epochs = 250
-        mini_batch_size = 1000
-
-        # num_epochs = 3
         mini_batch_size = 20
-
-
-
-        # num_epochs = 1000
-        # mini_batch_size = 100
-        # optimizer = torch.optim.Adam(self.model.parameters(), lr=1e-3)
 
         for e in range(num_epochs):
             for b in range(0, train_input.size(dim=0), mini_batch_size):
@@ -67,8 +62,12 @@ class Model():
         # test_output = test_input.view(test_input.size(dim=0), -1)
         # predicted_output = torch.argmax(nn.softmax(test_output).data, 1)
 
+        test_input = test_input.to(self.device)
+
         test_input = test_input.type(torch.FloatTensor).div(255)
 
         predicted_output = self.model(test_input)
+
+        predicted_output = predicted_output.cpu()
 
         return predicted_output
