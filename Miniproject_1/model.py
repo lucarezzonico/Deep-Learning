@@ -5,10 +5,15 @@ from Miniproject_1.other.net import *
 # model.py will be imported by the testing pipeline
 
 class Model():
-    def __init__(self, lr=1e-4, optimizer='SGD', criterion='MSE', scheduler_gamma=0.8) -> None:
+    def __init__(self, net='Net', lr=1e-4, optimizer='SGD', criterion='MSE', scheduler_gamma=0.8) -> None:
         ## instantiate model + optimizer + loss function + any other stuff you need
 
-        self.model = Net()
+        if net == 'Net':
+            self.model = Net()
+        if net == 'Net2':
+            self.model = Net2()
+        if net == 'Net3':
+            self.model = Net3()
 
         self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
         print(self.device)
@@ -83,6 +88,6 @@ class Model():
 
         predicted_output = self.model(test_input)
 
-        predicted_output = predicted_output.cpu()
+        predicted_output = predicted_output.mul(255).to(torch.uint8)
 
         return predicted_output
