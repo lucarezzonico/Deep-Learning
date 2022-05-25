@@ -5,7 +5,6 @@ from torch import optim
 from Miniproject_2.other.modules import Conv2d, TransposeConv2d, NearestUpsampling, ReLU, Sigmoid, Sequential, MSE, SGD
 # model.py will be imported by the testing pipeline
 
-torch.set_grad_enabled(False)
 
 class Model():
     def __init__(self) -> None:
@@ -80,6 +79,8 @@ class Model():
     def train(self, train_input, train_target, num_epochs=1, mini_batch_size = 20) -> None:
         #: train_input : tensor of size (N, C, H, W) containing a noisy version of the images.
         #: train_target : tensor of size (N, C, H, W) containing another noisy version of the same images, which only differs from the input by their noise.
+
+        torch.set_grad_enabled(False)
 
         train_input = train_input.type(torch.FloatTensor).div(255)
         train_target = train_target.type(torch.FloatTensor).div(255)
