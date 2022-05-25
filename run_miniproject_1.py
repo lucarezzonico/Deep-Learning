@@ -63,9 +63,9 @@ train_target = noisy_imgs_train_2[0:train_data_upper_index, :, :, :]
 test_input = noisy_imgs_valid[0:train_data_upper_index, :, :, :]
 test_target = clean_imgs_valid[0:train_data_upper_index, :, :, :]
 
-# model = Model(lr=1e-1, optimizer='SGD', criterion='MSE')
-# model = Model(lr=1e-3, optimizer='Adam', criterion='MSE')
-# model = Model(lr=1e-3, optimizer='Adagrad', criterion='MSE')
+# model = Model(net='Net2', lr=1e-1, optimizer='SGD', criterion='MSE')
+# model = Model(net='Net2', lr=1e-3, optimizer='Adam', criterion='MSE')
+# model = Model(net='Net2', lr=1e-3, optimizer='Adagrad', criterion='MSE')
 model = Model(net='Net2', lr=5e-1, optimizer='Adadelta', criterion='MSE', scheduler_gamma=0.8)
 
 # train
