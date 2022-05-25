@@ -12,9 +12,13 @@ print('noisy_imgs_train_1', noisy_imgs_train_1.size(), 'noisy_imgs_train_2', noi
 print('noisy_imgs_valid', noisy_imgs_valid.size(), 'clean_imgs_valid', clean_imgs_valid.size())
 
 
-def compute_psnr(x, y, max_range=1.0):
+def compute_psnr_mean(x, y):
     assert x.shape == y.shape and x.ndim == 4
-    return 20 * torch.log10(torch.tensor(max_range)) - 10 * torch.log10(((x-y) ** 2).mean((1,2,3))).mean()
+    return - 10 * torch.log10(((x-y) ** 2).mean((1,2,3))).mean()
+
+def compute_psnr_std(x, y):
+    assert x.shape == y.shape and x.ndim == 4
+    return - 10 * torch.log10(((x-y) ** 2).mean((1,2,3))).std()
 
 def plot_images(*args, titles):
     for i in range(args[0].size(dim=0)): # number images to plot for each dataset
@@ -61,21 +65,19 @@ test_target = clean_imgs_valid[0:1000, :, :, :]
 model = Model()
 
 # train
-model.train(train_input, train_target, num_epochs=15)
+model.train(train_input, train_target, num_epochs=15, mini_batch_size = 20)
 model.save_model()
 
 # load model
 model.load_pretrained_model()
 
 # denoise input
-denoised_test_input = model.predict(test_input)
-denoised_test_input = denoised_test_input.detach()
+denoised_test_input = model.predict(test_input).detach()
 
 # PSNR
-psnr = float(compute_psnr(denoised_test_input, test_target.type(torch.FloatTensor).div(255)))
-print('PSNR = {:.2f}'.format(psnr),'dB')
-
-denoised_test_input = denoised_test_input.mul(255).to(torch.uint8)
+psnr_mean = float(compute_psnr_mean(denoised_test_input.type(torch.FloatTensor).div(255), test_target.type(torch.FloatTensor).div(255)))
+psnr_std = abs(float(compute_psnr_std(denoised_test_input.type(torch.FloatTensor).div(255), test_target.type(torch.FloatTensor).div(255))))
+print('mean psnr = {:.5f}'.format(psnr_mean),'dB', 'std psnr = {:.5f}'.format(psnr_std),'dB')
 
 # plot denoised image
 plot_images(test_input[0:4,:,:,:], denoised_test_input[0:4,:,:,:], test_target[0:4,:,:,:],

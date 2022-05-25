@@ -77,19 +77,18 @@ class Model():
             self.model.blocks[i].d_bias.data = m_state_dict[i+1][1]
         # print('model loaded')
 
-    def train(self, train_input, train_target, num_epochs=1) -> None:
+    def train(self, train_input, train_target, num_epochs=1, mini_batch_size = 20) -> None:
         #: train_input : tensor of size (N, C, H, W) containing a noisy version of the images.
         #: train_target : tensor of size (N, C, H, W) containing another noisy version of the same images, which only differs from the input by their noise.
 
         train_input = train_input.type(torch.FloatTensor).div(255)
         train_target = train_target.type(torch.FloatTensor).div(255)
 
-        mini_batch_size = 20
-
         for e in range(num_epochs):
             for b in range(0, train_input.size(dim=0), mini_batch_size):
                 print('batch {:d}'.format(b))
                 self.optimizer.zero_grad()
+
                 # forward pass
                 output = self.model.forward(train_input.narrow(dim=0, start=b, length=mini_batch_size)) # takes time
                 loss = self.criterion.forward(output, train_target.narrow(dim=0, start=b, length=mini_batch_size))
@@ -99,7 +98,7 @@ class Model():
                 self.model.backward(d_loss_d_y)
 
                 self.optimizer.step()
-            print('epoch {:d}/{:d}'.format(e + 1, num_epochs), 'training loss = {:.2f}'.format(loss))
+            print('epoch {:d}/{:d}'.format(e + 1, num_epochs), 'training loss = {:.5f}'.format(loss))
 
     def predict(self, test_input) -> torch.Tensor:
         #: test_input : tensor of size (N1 , C, H, W) that has to be denoised by the trained or the loaded network.
@@ -113,5 +112,7 @@ class Model():
         test_input = test_input.type(torch.FloatTensor).div(255)
 
         predicted_output = self.model.forward(test_input)
+
+        predicted_output = predicted_output.mul(255).to(torch.uint8)
 
         return predicted_output

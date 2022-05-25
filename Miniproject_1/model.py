@@ -68,6 +68,7 @@ class Model():
                 loss.backward()  # takes time
                 self.optimizer.step()
 
+            print('epoch {:d}/{:d}'.format(e + 1, num_epochs), 'training loss = {:.5f}'.format(loss))
             self.scheduler.step()  # decrease learning rate
 
     def predict(self, test_input) -> torch.Tensor:
