@@ -12,8 +12,6 @@ class Model():
             self.model = Net()
         if net == 'Net2':
             self.model = Net2()
-        if net == 'Net3':
-            self.model = Net3()
 
         self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
         print(self.device)
@@ -59,7 +57,7 @@ class Model():
 
         for e in range(num_epochs):
             for b in range(0, train_input.size(dim=0), mini_batch_size):
-                output = self.model(train_input.narrow(dim=0, start=b, length=mini_batch_size)) # takes time
+                output = self.model(train_input.narrow(dim=0, start=b, length=mini_batch_size))  # takes time
                 loss = self.criterion(output, train_target.narrow(dim=0, start=b, length=mini_batch_size))
                 self.optimizer.zero_grad()
 
@@ -67,11 +65,10 @@ class Model():
                 for p in self.model.parameters():
                     loss += lambda_l2 * p.pow(2).sum()
 
-                loss.backward() # takes time
+                loss.backward()  # takes time
                 self.optimizer.step()
-            print('epoch {:d}/{:d}'.format(e + 1, num_epochs), 'training loss = {:.2f}'.format(loss))
 
-            self.scheduler.step() # decrease learning rate
+            self.scheduler.step()  # decrease learning rate
 
     def predict(self, test_input) -> torch.Tensor:
         #: test_input : tensor of size (N1 , C, H, W) that has to be denoised by the trained or the loaded network.

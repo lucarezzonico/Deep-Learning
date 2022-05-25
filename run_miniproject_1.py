@@ -63,10 +63,10 @@ train_target = noisy_imgs_train_2[0:train_data_upper_index, :, :, :]
 test_input = noisy_imgs_valid[0:train_data_upper_index, :, :, :]
 test_target = clean_imgs_valid[0:train_data_upper_index, :, :, :]
 
-# model = Model(net='Net2', lr=1e-1, optimizer='SGD', criterion='MSE')
-# model = Model(net='Net2', lr=1e-3, optimizer='Adam', criterion='MSE')
-# model = Model(net='Net2', lr=1e-3, optimizer='Adagrad', criterion='MSE')
-model = Model(net='Net2', lr=5e-1, optimizer='Adadelta', criterion='MSE', scheduler_gamma=0.8)
+# model = Model(net='Net', lr=1e-1, optimizer='SGD', criterion='MSE', scheduler_gamma=1)
+# model = Model(net='Net', lr=1e-3, optimizer='Adam', criterion='MSE', scheduler_gamma=1)
+# model = Model(net='Net', lr=1e-3, optimizer='Adagrad', criterion='MSE', scheduler_gamma=1)
+model = Model(net='Net', lr=5e-1, optimizer='Adadelta', criterion='MSE', scheduler_gamma=1)
 
 # train
 model.train(train_input, train_target, num_epochs=2, mini_batch_size=20, lambda_l2=0)
@@ -79,15 +79,10 @@ model.load_pretrained_model()
 denoised_test_input = model.predict(test_input).cpu().detach()
 
 # PSNR
-psnr_mean = float(compute_psnr_mean(denoised_test_input.type(torch.FloatTensor).div(255), test_target.float().div(255)))
-psnr_std = abs(float(compute_psnr_std(denoised_test_input, test_target.float().div(255))))
-print('mean psnr = {:.2f}'.format(psnr_mean),'dB', 'std psnr = {:.2f}'.format(psnr_std),'dB')
+psnr_mean = float(compute_psnr_mean(denoised_test_input.float().div(255), test_target.float().div(255)))
+psnr_std = abs(float(compute_psnr_std(denoised_test_input.float().div(255), test_target.float().div(255))))
+print('mean psnr = {:.5f}'.format(psnr_mean),'dB', 'std psnr = {:.5f}'.format(psnr_std),'dB')
 
-denoised_test_input = denoised_test_input.mul(255).to(torch.uint8)
 
 # plot denoised image
-plot_images(test_input[0:4,:,:,:], denoised_test_input[0:4,:,:,:].cpu().detach(), test_target[0:4,:,:,:], titles=['test_input','denoised_test_input','test_target'])
-
-# mse or this loss?
-# loss = 0.5 * (denoised_test_input - input).pow(2).sum() / input.size(0)
-
+plot_images(test_input[0:4,:,:,:], denoised_test_input[0:4,:,:,:], test_target[0:4,:,:,:], titles=['test_input','denoised_test_input','test_target'])
