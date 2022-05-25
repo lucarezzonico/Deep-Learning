@@ -87,7 +87,6 @@ class Model():
 
         for e in range(num_epochs):
             for b in range(0, train_input.size(dim=0), mini_batch_size):
-                print('batch {:d}'.format(b))
                 self.optimizer.zero_grad()
 
                 # forward pass
