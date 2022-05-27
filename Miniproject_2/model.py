@@ -63,7 +63,7 @@ class Model():
 
     # print('model loaded')
 
-    def train(self, train_input, train_target, num_epochs=7, mini_batch_size=50, scheduler_gamma=1, lambda_l2=0) -> None:
+    def train(self, train_input, train_target, num_epochs=7, mini_batch_size=4, scheduler_gamma=1, lambda_l2=0) -> None:
         #: train_input : tensor of size (N, C, H, W) containing a noisy version of the images.
         #: train_target : tensor of size (N, C, H, W) containing another noisy version of the same images, which only differs from the input by their noise.
 

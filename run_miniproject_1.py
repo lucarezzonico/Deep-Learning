@@ -86,10 +86,10 @@ model = Model(net='Net', lr=1e-1, optimizer='SGD', criterion='MSE', scheduler_ga
 
 # train
 model.train(train_input, train_target, num_epochs=7, mini_batch_size=20, lambda_l2=0)
-model.save_model(path_to_project + 'Miniproject_1/bestmodel.pth')
+# model.save_model(path_to_project + 'Miniproject_1/bestmodel.pth')
 
 # load model
-model.load_pretrained_model(path_to_project + 'Miniproject_1/bestmodel.pth')
+# model.load_pretrained_model(path_to_project + 'Miniproject_1/bestmodel.pth')
 
 # denoise input
 denoised_test_input = model.predict(test_input).cpu()

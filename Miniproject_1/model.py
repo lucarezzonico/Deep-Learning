@@ -7,7 +7,7 @@ from Miniproject_1.other.net import *
 # model.py will be imported by the testing pipeline
 
 class Model():
-    def __init__(self, net='Net', lr=1e-4, optimizer='SGD', criterion='MSE', scheduler_gamma=0.8) -> None:
+    def __init__(self, net='Net', lr=8e-4, optimizer='Adam', criterion='MSE', scheduler_gamma=1) -> None:
         ## instantiate model + optimizer + loss function + any other stuff you need
 
         if net == 'Net':
@@ -48,7 +48,7 @@ class Model():
         self.model.load_state_dict(m_state_dict)
         # print('model loaded')
 
-    def train(self, train_input, train_target, num_epochs=7, mini_batch_size=50, lambda_l2=0) -> None:
+    def train(self, train_input, train_target, num_epochs=7, mini_batch_size=4, lambda_l2=0) -> None:
         #: train_input : tensor of size (N, C, H, W) containing a noisy version of the images.
         #: train_target : tensor of size (N, C, H, W) containing another noisy version of the same images, which only differs from the input by their noise.
 

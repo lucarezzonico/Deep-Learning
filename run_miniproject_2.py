@@ -74,11 +74,11 @@ test_target = clean_imgs_valid[0:1000, :, :, :]
 model = Model(lr=10)
 
 # train
-model.train(train_input, train_target, num_epochs=7, mini_batch_size=50, scheduler_gamma=1, lambda_l2=0)
-model.save_model(path_to_project + 'Miniproject_2/bestmodel.pth')
+model.train(train_input, train_target, num_epochs=7, mini_batch_size=4, scheduler_gamma=1, lambda_l2=0)
+# model.save_model(path_to_project + 'Miniproject_2/bestmodel.pth')
 
 # load model
-model.load_pretrained_model(path_to_project + 'Miniproject_2/bestmodel.pth')
+# model.load_pretrained_model(path_to_project + 'Miniproject_2/bestmodel.pth')
 
 # denoise input
 denoised_test_input = model.predict(test_input).cpu()

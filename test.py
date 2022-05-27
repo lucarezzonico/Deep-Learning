@@ -136,7 +136,7 @@ class Tests(unittest.TestCase):
 
         output_psnr_before = self.compute_psnr(val_input, val_target)
 
-        model.train(train_input0, train_input1, num_epochs=1)
+        model.train(train_input0[0:1000], train_input1[0:1000], num_epochs=1)
 
         mini_batch_size = 100
         model_outputs = []

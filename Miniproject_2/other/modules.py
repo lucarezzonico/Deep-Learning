@@ -50,21 +50,19 @@ class Conv2d(Module):
         wxb = wxb.view(self.input.shape[0], self.out_channels,
                        int((self.input.shape[2] + 2*self.padding[0] - self.dilation[0]*(self.kernel_size[0]-1) - 1)/self.stride[0] + 1),
                        int((self.input.shape[3] + 2*self.padding[1] - self.dilation[1]*(self.kernel_size[1]-1) - 1)/self.stride[1] + 1))
-        # print('wxb reshaped : ', wxb.shape)
         return wxb
 
     def backward(self, gradwrtoutput):
         gradwrtoutput_reshaped = gradwrtoutput.permute(1, 2, 3, 0).reshape(self.out_channels, -1)
         input_unfolded_reshaped = self.input_unfolded.permute(2, 0, 1).reshape(gradwrtoutput_reshaped.shape[1], -1)
-        self.d_weight.data = torch.matmul(gradwrtoutput_reshaped, input_unfolded_reshaped).reshape(self.weight.shape)
+        self.d_weight.data = (gradwrtoutput_reshaped @ input_unfolded_reshaped).reshape(self.weight.shape)
         self.d_bias.data = gradwrtoutput.sum(axis=(0,2,3))
-        weight_reshaped = self.weight.reshape(self.out_channels, -1)
-        d_input_unfolded = torch.matmul(weight_reshaped.t(), gradwrtoutput_reshaped)
-        d_input_unfolded = d_input_unfolded.reshape(self.input_unfolded.permute(1, 2, 0).shape)
-        d_input_unfolded = d_input_unfolded.permute(2, 0, 1)
-        d_input = fold(d_input_unfolded, (self.input.shape[2], self.input.shape[3]), kernel_size=self.kernel_size,
-                                          stride=self.stride, padding=self.padding, dilation=self.dilation)
-        return d_input
+        gradwrtinput_unfolded = self.weight.reshape(self.out_channels, -1).t() @ gradwrtoutput_reshaped
+        gradwrtinput_unfolded = gradwrtinput_unfolded.reshape(self.input_unfolded.permute(1, 2, 0).shape).permute(2, 0, 1)
+        gradwrtinput = fold(gradwrtinput_unfolded, (self.input.shape[2], self.input.shape[3]), kernel_size=self.kernel_size,
+                                                   stride=self.stride, padding=self.padding, dilation=self.dilation)
+        # print('gradwrtinput : ', gradwrtinput.shape)
+        return gradwrtinput
 
     def param(self):
         return [[self.weight, self.d_weight],
@@ -84,12 +82,12 @@ class NearestUpsampling(Module):
         return upsampled_input
 
     def backward(self, gradwrtoutput):
-        d_input = gradwrtoutput.unfold(dimension=3, size=self.scale_factor[1], step=self.scale_factor[1])
-        d_input = d_input.sum(dim=4)
-        d_input = d_input.unfold(dimension=2, size=self.scale_factor[0], step=self.scale_factor[0])
-        d_input = d_input.sum(dim=4)
-        d_input = d_input.div(self.scale_factor[0] * self.scale_factor[1])
-        return d_input
+        gradwrtinput = gradwrtoutput.unfold(dimension=3, size=self.scale_factor[1], step=self.scale_factor[1])
+        gradwrtinput = gradwrtinput.sum(dim=4)
+        gradwrtinput = gradwrtinput.unfold(dimension=2, size=self.scale_factor[0], step=self.scale_factor[0])
+        gradwrtinput = gradwrtinput.sum(dim=4)
+        gradwrtinput = gradwrtinput.div(self.scale_factor[0] * self.scale_factor[1])
+        return gradwrtinput
 
     def param(self):
         return []
