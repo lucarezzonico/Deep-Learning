@@ -1,6 +1,8 @@
 import torch
 import torch.nn as nn
 from torch import optim
+
+
 from Miniproject_1.other.net import *
 # model.py will be imported by the testing pipeline
 
@@ -35,18 +37,18 @@ class Model():
 
         self.scheduler = optim.lr_scheduler.StepLR(self.optimizer, step_size=1, gamma=scheduler_gamma)
 
-    def save_model(self) -> None:
+    def save_model(self, path='Miniproject_2/bestmodel.pth') -> None:
         ## This saves the parameters of the model into bestmodel.pth
-        torch.save(self.model.state_dict(), 'Miniproject_1/bestmodel.pth')
+        torch.save(self.model.state_dict(), path)
         # print('model saved to bestmodel.pth')
 
-    def load_pretrained_model(self) -> None:
+    def load_pretrained_model(self, path='Miniproject_2/bestmodel.pth') -> None:
         ## This loads the parameters saved in bestmodel.pth into the model
-        m_state_dict = torch.load('Miniproject_1/bestmodel.pth')
+        m_state_dict = torch.load(path)
         self.model.load_state_dict(m_state_dict)
         # print('model loaded')
 
-    def train(self, train_input, train_target, num_epochs=1, mini_batch_size = 20, lambda_l2=0) -> None:
+    def train(self, train_input, train_target, num_epochs=7, mini_batch_size=50, lambda_l2=0) -> None:
         #: train_input : tensor of size (N, C, H, W) containing a noisy version of the images.
         #: train_target : tensor of size (N, C, H, W) containing another noisy version of the same images, which only differs from the input by their noise.
 
@@ -75,17 +77,10 @@ class Model():
         #: test_input : tensor of size (N1 , C, H, W) that has to be denoised by the trained or the loaded network.
         #: returns a tensor of the size (N1 , C, H, W)
 
-        # predicted_output =  torch.empty_like(test_input)
-
-        # test_output = test_input.view(test_input.size(dim=0), -1)
-        # predicted_output = torch.argmax(nn.softmax(test_output).data, 1)
-
         test_input = test_input.to(self.device)
 
         test_input = test_input.float().div(255)
-
         predicted_output = self.model(test_input)
-
         predicted_output = predicted_output.mul(255).to(torch.uint8)
 
         return predicted_output

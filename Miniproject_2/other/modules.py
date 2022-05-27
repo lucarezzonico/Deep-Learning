@@ -1,6 +1,7 @@
 import torch
 from torch.nn.functional import fold, unfold
 
+device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
 # implemented modules and losses will inherit from Module
 class Module(object):
@@ -37,13 +38,13 @@ class Conv2d(Module):
 
         # Xavier initialization
         a = 3**0.5 * (2/((self.in_channels + self.out_channels) * self.kernel_size[0] * self.kernel_size[1]))**0.5
-        self.weight = torch.empty(out_channels, in_channels, self.kernel_size[0], self.kernel_size[1]).uniform_(-a, a)
-        self.d_weight = torch.empty(out_channels, in_channels, self.kernel_size[0], self.kernel_size[1]).zero_()
-        self.bias = torch.empty(out_channels).uniform_(-a, a)
-        self.d_bias = torch.empty(out_channels).zero_()
+        self.weight = torch.empty(out_channels, in_channels, self.kernel_size[0], self.kernel_size[1]).uniform_(-a, a).to(device)
+        self.d_weight = torch.empty(out_channels, in_channels, self.kernel_size[0], self.kernel_size[1]).zero_().to(device)
+        self.bias = torch.empty(out_channels).uniform_(-a, a).to(device)
+        self.d_bias = torch.empty(out_channels).zero_().to(device)
 
     def forward(self, input):
-        self.input = input
+        self.input = input.to(device)
         self.input_unfolded = unfold(self.input, kernel_size=self.kernel_size, stride=self.stride, padding=self.padding, dilation=self.dilation)
         wxb = self.weight.view(self.out_channels, -1) @ self.input_unfolded + self.bias.view(1, -1, 1)
         wxb = wxb.view(self.input.shape[0], self.out_channels,
@@ -53,74 +54,21 @@ class Conv2d(Module):
         return wxb
 
     def backward(self, gradwrtoutput):
-        # print(gradwrtoutput.shape)
         gradwrtoutput_reshaped = gradwrtoutput.permute(1, 2, 3, 0).reshape(self.out_channels, -1)
-        # print(gradwrtoutput_reshaped.shape)
         input_unfolded_reshaped = self.input_unfolded.permute(2, 0, 1).reshape(gradwrtoutput_reshaped.shape[1], -1)
-        # print(input_unfolded_reshaped.shape)
         self.d_weight.data = torch.matmul(gradwrtoutput_reshaped, input_unfolded_reshaped).reshape(self.weight.shape)
-        # print(self.d_weight.data.shape)
         self.d_bias.data = gradwrtoutput.sum(axis=(0,2,3))
-        # print(self.d_bias.data.shape)
         weight_reshaped = self.weight.reshape(self.out_channels, -1)
-        # print(weight_reshaped.shape)
         d_input_unfolded = torch.matmul(weight_reshaped.t(), gradwrtoutput_reshaped)
-        # print(d_input_unfolded.shape)
         d_input_unfolded = d_input_unfolded.reshape(self.input_unfolded.permute(1, 2, 0).shape)
-        # print(d_input_unfolded.shape)
         d_input_unfolded = d_input_unfolded.permute(2, 0, 1)
-        # print(d_input_unfolded.shape)
         d_input = fold(d_input_unfolded, (self.input.shape[2], self.input.shape[3]), kernel_size=self.kernel_size,
                                           stride=self.stride, padding=self.padding, dilation=self.dilation)
-        # print(d_input.shape)
         return d_input
 
     def param(self):
-        return [(self.weight, self.d_weight),
-                (self.bias, self.d_bias)]
-
-# Transpose convolution layer, or alternatively a combination of Nearest neighbor upsampling + Convolution
-class TransposeConv2d(Module):
-    def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0, dilation=1):
-        self.in_channels = in_channels
-        self.out_channels = out_channels
-        self.kernel_size = kernel_size if isinstance(kernel_size, tuple) else (kernel_size, kernel_size)
-        self.stride = stride if isinstance(stride, tuple) else (stride, stride)
-        self.padding = padding if isinstance(padding, tuple) else (padding, padding)
-        self.dilation = dilation if isinstance(dilation, tuple) else (dilation, dilation)
-
-        # Xavier initialization
-        a = 3**0.5 * (2/((self.in_channels + self.out_channels) * self.kernel_size[0] * self.kernel_size[1]))**0.5
-        self.weight = torch.empty(out_channels, in_channels, self.kernel_size[0], self.kernel_size[1]).uniform_(-a, a)
-        self.d_weight = torch.empty(out_channels, in_channels, self.kernel_size[0], self.kernel_size[1]).zero_()
-        self.bias = torch.empty(out_channels).uniform_(-a, a)
-        self.d_bias = torch.empty(out_channels).zero_()
-
-    def forward(self, input):
-        self.input = input
-        input_unfolded = self.input.permute(1, 2, 3, 0).reshape(self.in_channels, -1)
-        weight_reshaped = self.weight.reshape(self.in_channels, -1)
-        output_unfolded = torch.matmul(weight_reshaped.t(), input_unfolded)
-        output_unfolded = output_unfolded.reshape(output_unfolded.shape[0], -1, self.input.shape[0])
-        output_unfolded = output_unfolded.permute(2, 0, 1)
-        H_out = (self.input.shape[2] - 1)*self.stride[0] - 2*self.padding[0] + self.dilation[0]*(self.kernel_size[0] - 1) + 1
-        W_out = (self.input.shape[3] - 1)*self.stride[1] - 2*self.padding[1] + self.dilation[1]*(self.kernel_size[1] - 1) + 1
-        output = fold(output_unfolded, (H_out, W_out), kernel_size=self.kernel_size, stride=self.stride, padding=self.padding, dilation=self.dilation) + self.bias.view(1, -1, 1, 1)
-        return output
-
-    def backward(self, gradwrtoutput):
-        input_reshaped = self.input.permute(1, 2, 3, 0).reshape(self.in_channels, -1)
-        gradwrtoutput_unfolded = unfold(gradwrtoutput, kernel_size=self.kernel_size, stride=self.stride, padding=self.padding, dilation=self.dilation)
-        gradwrtoutput_unfolded_reshaped = gradwrtoutput_unfolded.permute(2, 0, 1).reshape(input_reshaped.shape[1], -1)
-        self.d_weight.data = torch.matmul(input_reshaped, gradwrtoutput_unfolded_reshaped).reshape(self.weight.shape)
-        self.d_bias.data = gradwrtoutput.sum(axis=(0,2,3))
-        d_input = torch.matmul(self.weight.view(self.in_channels, -1), gradwrtoutput_unfolded)
-        d_input = d_input.view(d_input.shape[0], self.in_channels, self.input.shape[2], self.input.shape[3])
-        return d_input
-
-    def param(self):
-        return [(self.weight, self.d_weight),
-                (self.bias, self.d_bias)]
+        return [[self.weight, self.d_weight],
+                [self.bias, self.d_bias]]
 
 # Upsampling layer, which is usually implemented with transposed convolution, but you can alternatively use a combination of Nearest neighbor upsampling + Convolution for this mini-project
 class NearestUpsampling(Module):
@@ -129,12 +77,19 @@ class NearestUpsampling(Module):
 
     def forward(self, input):
         self.input = input
-        upsampled_input = self.input.repeat_interleave(self.scale_factor[0], dim=2)
-        upsampled_input = upsampled_input.repeat_interleave(self.scale_factor[1], dim=3)
+        # print(input.shape)
+        upsampled_input = self.input.repeat_interleave(self.scale_factor[1], dim=3)
+        upsampled_input = upsampled_input.repeat_interleave(self.scale_factor[0], dim=2)
+        # print(upsampled_input.shape)
         return upsampled_input
 
     def backward(self, gradwrtoutput):
-        pass
+        d_input = gradwrtoutput.unfold(dimension=3, size=self.scale_factor[1], step=self.scale_factor[1])
+        d_input = d_input.sum(dim=4)
+        d_input = d_input.unfold(dimension=2, size=self.scale_factor[0], step=self.scale_factor[0])
+        d_input = d_input.sum(dim=4)
+        d_input = d_input.div(self.scale_factor[0] * self.scale_factor[1])
+        return d_input
 
     def param(self):
         return []
@@ -203,16 +158,16 @@ class Sequential(Module):
 # Mean Squared Error Loss Function
 class MSE(Module):
     def __init__(self):
-        super().__init__()
+        pass
 
     def forward(self, input, target):
         self.input = input
         self.target = target
-        self.loss = torch.mean((input - target)**2)
+        self.loss = ((input-target)**2).mean()
         return self.loss
 
     def backward(self):
-        self.output = 2*(self.input - self.target) / (self.input.shape[0] * self.input.shape[1] * self.input.shape[2] * self.input.shape[3])
+        self.output = 2 * (self.input-self.target) / (self.input.shape[0] * self.input.shape[1] * self.input.shape[2] * self.input.shape[3])
         return self.output
 
     def param(self):
@@ -226,12 +181,13 @@ class SGD(Module):
 
     def step(self):
         for [param, d_param] in self.params:
-            param.data -= self.lr * d_param
+            param.data.add_(-self.lr * d_param)  # put d_param to 0
 
     def zero_grad(self):
         for p in self.param():
-            p[1].zero_()
+            p[1].zero_()  # put d_param to 0
 
     def param(self):
         return self.params
+
 
