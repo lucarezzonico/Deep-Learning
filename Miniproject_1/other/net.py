@@ -79,9 +79,7 @@ class Net(nn.Module):
         concat1 = torch.cat((upsample1, input), dim=1)  # skip connection
         output = self.group6(concat1)
 
-        # Final activation
         return output
-
 
 class Net2(nn.Module):
     def __init__(self, nb_input=3, nb_output=3):
@@ -90,7 +88,7 @@ class Net2(nn.Module):
 
         self.model = nn.Sequential(
             # encoder
-            nn.Conv2d(in_channels=3, out_channels=32, kernel_size=5, stride=1, padding=0, dilation=1),
+            nn.Conv2d(in_channels=nb_input, out_channels=32, kernel_size=5, stride=1, padding=0, dilation=1),
             nn.ReLU(),
             nn.Conv2d(in_channels=32, out_channels=32, kernel_size=5, stride=1, padding=0, dilation=1),
             nn.ReLU(),
@@ -108,7 +106,28 @@ class Net2(nn.Module):
             nn.ReLU(),
             nn.ConvTranspose2d(in_channels=32, out_channels=32, kernel_size=5, stride=1, padding=0, dilation=1),
             nn.ReLU(),
-            nn.ConvTranspose2d(in_channels=32, out_channels=3, kernel_size=5, stride=1, padding=0, dilation=1)
+            nn.ConvTranspose2d(in_channels=32, out_channels=nb_output, kernel_size=5, stride=1, padding=0, dilation=1)
+        )
+
+    def forward(self, input):
+        return self.model(input)
+
+class Net3(nn.Module):
+    def __init__(self, nb_input=3, nb_output=3):
+        # initialize deep-learning network
+        super(Net3, self).__init__()
+
+        self.model = nn.Sequential(
+            nn.Conv2d(in_channels=nb_input, out_channels=128, kernel_size=2, stride=2, padding=0),
+            nn.ReLU(),
+            nn.Conv2d(in_channels=128, out_channels=256, kernel_size=2, stride=2, padding=0),
+            nn.ReLU(),
+            nn.UpsamplingNearest2d(scale_factor=2),
+            nn.Conv2d(in_channels=256, out_channels=128, kernel_size=2, stride=1, padding=1),
+            nn.ReLU(),
+            nn.UpsamplingNearest2d(scale_factor=2),
+            nn.Conv2d(in_channels=128, out_channels=nb_output, kernel_size=3, stride=1, padding=0),
+            nn.Sigmoid()
         )
 
     def forward(self, input):

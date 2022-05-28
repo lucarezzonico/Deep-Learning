@@ -76,8 +76,8 @@ class Model():
 
         for e in range(num_epochs):
 
-            self.learning_rate = self.learning_rate * scheduler_gamma
-            self.optimizer = SGD(self.model.param(), lr=self.learning_rate)
+            # self.learning_rate = self.learning_rate * scheduler_gamma
+            # self.optimizer = SGD(self.model.param(), lr=self.learning_rate)
 
             for b in range(0, train_input.size(dim=0), mini_batch_size):
                 self.optimizer.zero_grad()
@@ -86,9 +86,9 @@ class Model():
                 output = self.model.forward(train_input.narrow(dim=0, start=b, length=mini_batch_size)) # takes time
                 loss = self.criterion.forward(output, train_target.narrow(dim=0, start=b, length=mini_batch_size))
 
-                # L2 penalty term (to avoid overfitting the training data for an increasing number of epochs)
-                for p in self.model.param():
-                    loss += lambda_l2 * ((p[0]**2).sum() + (p[1]**2).sum())
+                # # L2 penalty term (to avoid overfitting the training data for an increasing number of epochs)
+                # for p in self.model.param():
+                #     loss += lambda_l2 * ((p[0]**2).sum() + (p[1]**2).sum())
 
                 # backward pass
                 d_loss_d_y = self.criterion.backward().to(self.device)
